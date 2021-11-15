@@ -28,6 +28,14 @@ public class Practica2Pila {
         cad=lex1.cadenaLexico();
         sim=lex1.darElemento(indice).darTipo();
         cadavance=cadavance+sim;
+        
+        NoTerminal v = new NoTerminal("v",0,0);
+        NoTerminal s = new NoTerminal("s",0,0);
+        
+        analizador.adicionarNodo(v);
+        analizador.adicionarNodo(s);
+        
+        NoTerminal nt=null;
     }
     
     public static void suma(){
