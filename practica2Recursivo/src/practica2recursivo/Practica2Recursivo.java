@@ -41,12 +41,360 @@ package practica2recursivo;
  * @author lalo9
  */
 public class Practica2Recursivo {
-
-    /**
-     * @param args the command line arguments
-     */
+    
+    static String cad="+5*4 3¬";
+    static String cad1 = "0123456789.";
+    static int indice=0;
+    static char sim=' ';
+    static Lexico lex1 = new Lexico();
+    static String cadavance="";
+    static Analizador analizador = new Analizador();
+    
     public static void main(String[] args) {
         // TODO code application logic here
+        analisisLexico();
+        cad=lex1.cadenaLexico();
+        sim=lex1.darElemento(indice).darTipo();
+        cadavance=cadavance+sim;
+        
+        procS();
+        if (sim=='¬')
+            System.out.println("Se acepta la secuencia ");
+        else
+            System.out.println("Se rechaza la secuencia ");
     }
     
+    public static void procS(){
+        // <S> --> <E>{Resultado} 
+        
+        boolean res=false;
+        
+        switch (sim) {
+            case '|':case '&':case '<':case '>':case '=':case '!':case '+':case '-':case '*':case '/':case '^':case 'i':
+                    NoTerminal s1 = new NoTerminal("s1",0,0);
+                    procELO(s1);
+                    resultado(s1.getValor());
+                    return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+        
+    public static void procELO(NoTerminal s1){
+        // 2.	<ELO> s1 = <EL2> s2 <ELO_L> i1,s3
+        
+        switch (sim) {
+            case '|':case '&':case '<':case '>':case '=':case '!':case '+':case '-':case '*':case '/':case '^':case 'i':
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procEL2(s2);
+                    NoTerminal s3 = new NoTerminal("s3",0,0);
+                    procELO_L(s2, s3);
+                    s1.setValor(s3.getValor());
+                    return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procELO_L(NoTerminal i1, NoTerminal s1){
+        // 3.	<ELO_L> i1,s1 = | <EL2> s2{pRelacional} i2,i3 {procOR} i4,i5,s4 <ELO_L> i6,s5
+        
+        switch (sim) {
+            case '|':
+                    avance();
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procEL2(s2);
+                    pRelacional(i1, s2);
+                    NoTerminal s4 = new NoTerminal("s4",0,0);
+                    procOR(i1, s2, s4);
+                    NoTerminal s5 = new NoTerminal("s5",0,0);
+                    procELO_L(s4, s5);
+                    s1.setValor(s5.getValor());
+                    return;
+            case ' ':
+                s1.setValor(i1.getValor());
+                return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procEL2(NoTerminal s1){
+        // 2.	<ELO> s1 = <EL2> s2 <ELO_L> i1,s3
+        
+        switch (sim) {
+            case '&':case '<':case '>':case '=':case '!':case '+':case '-':case '*':case '/':case '^':case 'i':
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procER(s2);
+                    NoTerminal s3 = new NoTerminal("s3",0,0);
+                    procEL2_L(s2, s3);
+                    s1.setValor(s3.getValor());
+                    return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procEL2_L(NoTerminal i1, NoTerminal s1){
+        // 3.	<ELO_L> i1,s1 = | <EL2> s2{pRelacional} i2,i3 {procOR} i4,i5,s4 <ELO_L> i6,s5
+        
+        switch (sim) {
+            case '&':
+                    avance();
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procER(s2);
+                    pRelacional(i1, s2);
+                    NoTerminal s4 = new NoTerminal("s4",0,0);
+                    procAND(i1, s2, s4);
+                    NoTerminal s5 = new NoTerminal("s5",0,0);
+                    procEL2_L(s4, s5);
+                    s1.setValor(s5.getValor());
+                    return;
+            case ' ':
+                s1.setValor(i1.getValor());
+                return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procER(NoTerminal s1){
+        // 2.	<ELO> s1 = <EL2> s2 <ELO_L> i1,s3
+        
+        switch (sim) {
+            case '<':case '>':case '=':case '!':case '+':case '-':case '*':case '/':case '^':case 'i':
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procE(s2);
+                    NoTerminal s3 = new NoTerminal("s3",0,0);
+                    procER_L(s2, s3);
+                    s1.setValor(s3.getValor());
+                    return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procER_L(NoTerminal i1, NoTerminal s1){
+        // 2.	<ELO> s1 = <EL2> s2 <ELO_L> i1,s3
+        
+        switch (sim) {
+            case '<':case '>':case '=':case '!':case '+':case '-':case '*':case '/':case '^':case 'i':
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procORR(s2);
+                    NoTerminal s3 = new NoTerminal("s3",0,0);
+                    procE(s3);
+                    NoTerminal s4 = new NoTerminal("s4",0,0);
+                    pComparar(i1, s3, s2, s4);
+                    s1.setValor(s4.getValor());
+                    return;
+            case ' ':
+                s1.setValor(i1.getValor());
+                return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procORR(NoTerminal s1){
+        // 3.	<ELO_L> i1,s1 = | <EL2> s2{pRelacional} i2,i3 {procOR} i4,i5,s4 <ELO_L> i6,s5
+        
+        switch (sim) {
+            case '<':
+                    avance();
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procME(s2);
+                    s1.setValor(s2.getValor());
+                    return;
+            case '>':
+                    avance();
+                    NoTerminal s3 = new NoTerminal("s3",0,0);
+                    procMA(s3);
+                    s1.setValor(s3.getValor());
+                    return;
+            case '=':
+                    avance();
+                    NoTerminal s4 = new NoTerminal("s4",0,0);
+                    procIG(s4);
+                    s1.setValor(s4.getValor());
+                    return;
+            case '!':
+                    avance();
+                    NoTerminal s5 = new NoTerminal("s5",0,0);
+                    procDI(s5);
+                    s1.setValor(s5.getValor());
+                    return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procME(NoTerminal s1){
+        // 3.	<ELO_L> i1,s1 = | <EL2> s2{pRelacional} i2,i3 {procOR} i4,i5,s4 <ELO_L> i6,s5
+        
+        switch (sim) {
+            case '=':
+                    avance();
+                    s1.setValor(-1);
+                    return;
+            case ' ':
+                s1.setValor(-2);
+                return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procMA(NoTerminal s1){
+        // 3.	<ELO_L> i1,s1 = | <EL2> s2{pRelacional} i2,i3 {procOR} i4,i5,s4 <ELO_L> i6,s5
+        
+        switch (sim) {
+            case '=':
+                    avance();
+                    s1.setValor(-3);
+                    return;
+            case ' ':
+                s1.setValor(-4);
+                return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procIG(NoTerminal s1){
+        // 3.	<ELO_L> i1,s1 = | <EL2> s2{pRelacional} i2,i3 {procOR} i4,i5,s4 <ELO_L> i6,s5
+        
+        switch (sim) {
+            case '=':
+                    avance();
+                    s1.setValor(-5);
+                    return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procDI(NoTerminal s1){
+        // 3.	<ELO_L> i1,s1 = | <EL2> s2{pRelacional} i2,i3 {procOR} i4,i5,s4 <ELO_L> i6,s5
+        
+        switch (sim) {
+            case '=':
+                    avance();
+                    s1.setValor(-6);
+                    return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procE(NoTerminal s1){
+        // 2.	<ELO> s1 = <EL2> s2 <ELO_L> i1,s3
+        
+        switch (sim) {
+            case '+':case '-':case '*':case '/':case '^':case 'i':
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procT(s2);
+                    NoTerminal s3 = new NoTerminal("s3",0,0);
+                    procE_L(s2, s3);
+                    s1.setValor(s3.getValor());
+                    return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procE_L(NoTerminal i1, NoTerminal s1){
+        // 3.	<ELO_L> i1,s1 = | <EL2> s2{pRelacional} i2,i3 {procOR} i4,i5,s4 <ELO_L> i6,s5
+        
+        switch (sim) {
+            case '+':
+                    avance();
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procT(s2);
+                    NoTerminal s3 = new NoTerminal("s3",0,0);
+                    suma(i1.getValor(), s2.getValor(), s3);
+                    NoTerminal s4 = new NoTerminal("s4",0,0);
+                    procE_L(s3, s4);
+                    s1.setValor(s4.getValor());
+                    return;
+            case '-':
+                    avance();
+                    NoTerminal s5 = new NoTerminal("s5",0,0);
+                    procT(s5);
+                    NoTerminal s6 = new NoTerminal("s6",0,0);
+                    resta(i1.getValor(), s5.getValor(), s6);
+                    NoTerminal s7 = new NoTerminal("s7",0,0);
+                    procE_L(s6, s7);
+                    s1.setValor(s7.getValor());
+                    return;
+            case ' ':
+                s1.setValor(i1.getValor());
+                return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procT(NoTerminal s1){
+        // 2.	<ELO> s1 = <EL2> s2 <ELO_L> i1,s3
+        
+        switch (sim) {
+            case '*':case '/':case '^':case 'i':
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procF(s2);
+                    NoTerminal s3 = new NoTerminal("s3",0,0);
+                    procT_L(s2, s3);
+                    s1.setValor(s3.getValor());
+                    return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
+    
+    public static void procT_L(NoTerminal i1, NoTerminal s1){
+        // 3.	<ELO_L> i1,s1 = | <EL2> s2{pRelacional} i2,i3 {procOR} i4,i5,s4 <ELO_L> i6,s5
+        
+        switch (sim) {
+            case '*':
+                    avance();
+                    NoTerminal s2 = new NoTerminal("s2",0,0);
+                    procF(s2);
+                    NoTerminal s3 = new NoTerminal("s3",0,0);
+                    multiplicacion(i1.getValor(), s2.getValor(), s3);
+                    NoTerminal s4 = new NoTerminal("s4",0,0);
+                    procT_L(s3, s4);
+                    s1.setValor(s4.getValor());
+                    return;
+            case '/':
+                    avance();
+                    NoTerminal s5 = new NoTerminal("s5",0,0);
+                    procF(s5);
+                    NoTerminal s6 = new NoTerminal("s6",0,0);
+                    division(i1.getValor(), s5.getValor(), s6);
+                    NoTerminal s7 = new NoTerminal("s7",0,0);
+                    procT_L(s6, s7);
+                    s1.setValor(s7.getValor());
+                    return;
+            case ' ':
+                s1.setValor(i1.getValor());
+                return;
+            default: 
+                    System.out.println("Secuencia"+cad+" no se acepta");
+                    rechace();
+        }
+    }
 }
